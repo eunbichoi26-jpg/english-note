@@ -1685,13 +1685,17 @@ async function confirmRestart(mode) {
    ========================================================= */
 function renderWordsTab(filterText) {
   const container = document.getElementById('wordsContent');
-  const filter = (filterText || '').trim().toLowerCase();
-  const list = filter
-    ? state.words.filter(w =>
-        w.word.toLowerCase().includes(filter) ||
-        w.meaning.toLowerCase().includes(filter) ||
-        w.wrongForm.toLowerCase().includes(filter))
-    : state.words;
+
+  // 검색창 input이 이미 존재하고, 그 input이 지금 포커스(입력 중)되어 있다면
+  // toolbar를 다시 그리지 않고 목록(word-results)만 갱신한다.
+  // → 입력 중인 input 엘리먼트가 절대 재생성되지 않아 한글 조합이 끊기지 않는다.
+  const existingInput = document.getElementById('word-search');
+  const isTypingNow = existingInput && document.activeElement === existingInput;
+
+  if (isTypingNow) {
+    renderWordResultsOnly(filterText);
+    return;
+  }
 
   const toolbar = `
     <div class="list-toolbar">
@@ -1701,49 +1705,18 @@ function renderWordsTab(filterText) {
       </div>
       ${state.words.length > 0 ? `<button class="btn ghost sm" id="word-clear-all"><i class="ti ti-trash"></i> 전체 삭제</button>` : ''}
     </div>
+    <div id="word-results"></div>
   `;
-
-  if (state.words.length === 0) {
-    container.innerHTML = toolbar + `
-      <div class="empty-state">
-        <i class="ti ti-bookmark"></i>
-        <div class="t1">아직 저장된 단어가 없어요</div>
-        <div class="t2">영작이나 해석 연습 중 단어를 틀리면, 올바른 표현이 자동으로 여기에 모여요.</div>
-      </div>`;
-  } else if (list.length === 0) {
-    container.innerHTML = toolbar + `
-      <div class="empty-state">
-        <i class="ti ti-search"></i>
-        <div class="t1">검색 결과가 없어요</div>
-        <div class="t2">다른 검색어로 찾아보세요.</div>
-      </div>`;
-  } else {
-    container.innerHTML = toolbar + `<div class="word-grid">${list.map(w => `
-      <div class="word-card" data-id="${w.id}">
-        <div class="wc-actions"><button class="icon-btn" data-del-word="${w.id}" aria-label="삭제"><i class="ti ti-x"></i></button></div>
-        <div class="wc-top">
-          <div>
-            <div class="correct-word">${escapeHtml(w.word)}</div>
-            <div class="kr-meaning">${escapeHtml(w.meaning)}</div>
-          </div>
-        </div>
-        ${w.wrongForm ? `<div class="wrong-orig"><i class="ti ti-x" style="font-size:11px;"></i> 내가 쓴 표현: ${escapeHtml(w.wrongForm)}</div>` : ''}
-        ${w.example ? `<div class="example">${escapeHtml(w.example)}</div>` : ''}
-      </div>
-    `).join('')}</div>`;
-  }
+  container.innerHTML = toolbar;
+  renderWordResultsOnly(filterText);
 
   const searchInput = document.getElementById('word-search');
   if (searchInput) {
-    let composing = false;
-    searchInput.addEventListener('compositionstart', () => { composing = true; });
-    searchInput.addEventListener('compositionend', (e) => {
-      composing = false;
-      renderWordsTab(e.target.value);
-    });
+    let debounceTimer = null;
     searchInput.addEventListener('input', (e) => {
-      if (composing) return; // 한글 자모 조합 중에는 리렌더링하지 않음 (IME 포커스 유지)
-      renderWordsTab(e.target.value);
+      const value = e.target.value;
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => renderWordResultsOnly(value), 250);
     });
     if (filterText) {
       searchInput.focus();
@@ -1761,13 +1734,59 @@ function renderWordsTab(filterText) {
       showToast('단어장을 비웠어요.');
     });
   }
-  container.querySelectorAll('[data-del-word]').forEach(btn => {
+}
+
+// 검색 결과 목록만 다시 그린다 (검색창 input 자체는 건드리지 않음 → 한글 조합 안전)
+function renderWordResultsOnly(filterText) {
+  const resultsEl = document.getElementById('word-results');
+  if (!resultsEl) return;
+
+  const filter = (filterText || '').trim().toLowerCase();
+  const list = filter
+    ? state.words.filter(w =>
+        w.word.toLowerCase().includes(filter) ||
+        w.meaning.toLowerCase().includes(filter) ||
+        w.wrongForm.toLowerCase().includes(filter))
+    : state.words;
+
+  if (state.words.length === 0) {
+    resultsEl.innerHTML = `
+      <div class="empty-state">
+        <i class="ti ti-bookmark"></i>
+        <div class="t1">아직 저장된 단어가 없어요</div>
+        <div class="t2">영작이나 해석 연습 중 단어를 틀리면, 올바른 표현이 자동으로 여기에 모여요.</div>
+      </div>`;
+  } else if (list.length === 0) {
+    resultsEl.innerHTML = `
+      <div class="empty-state">
+        <i class="ti ti-search"></i>
+        <div class="t1">검색 결과가 없어요</div>
+        <div class="t2">다른 검색어로 찾아보세요.</div>
+      </div>`;
+  } else {
+    resultsEl.innerHTML = `<div class="word-grid">${list.map(w => `
+      <div class="word-card" data-id="${w.id}">
+        <div class="wc-actions"><button class="icon-btn" data-del-word="${w.id}" aria-label="삭제"><i class="ti ti-x"></i></button></div>
+        <div class="wc-top">
+          <div>
+            <div class="correct-word">${escapeHtml(w.word)}</div>
+            <div class="kr-meaning">${escapeHtml(w.meaning)}</div>
+          </div>
+        </div>
+        ${w.wrongForm ? `<div class="wrong-orig"><i class="ti ti-x" style="font-size:11px;"></i> 내가 쓴 표현: ${escapeHtml(w.wrongForm)}</div>` : ''}
+        ${w.example ? `<div class="example">${escapeHtml(w.example)}</div>` : ''}
+      </div>
+    `).join('')}</div>`;
+  }
+
+  resultsEl.querySelectorAll('[data-del-word]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const id = btn.getAttribute('data-del-word');
       state.words = state.words.filter(w => w.id !== id);
       await storageSet(STORAGE_KEYS.WORDS, state.words);
       updateBadgeCounts();
-      renderWordsTab(searchInput ? searchInput.value : '');
+      const searchInput = document.getElementById('word-search');
+      renderWordResultsOnly(searchInput ? searchInput.value : '');
       showToast('단어를 삭제했어요.');
     });
   });
@@ -1778,12 +1797,14 @@ function renderWordsTab(filterText) {
    ========================================================= */
 function renderSentencesTab(filterText) {
   const container = document.getElementById('sentencesContent');
-  const filter = (filterText || '').trim().toLowerCase();
-  const list = filter
-    ? state.sentences.filter(s =>
-        s.source.toLowerCase().includes(filter) ||
-        (s.mine || '').toLowerCase().includes(filter))
-    : state.sentences;
+
+  const existingInput = document.getElementById('sent-search');
+  const isTypingNow = existingInput && document.activeElement === existingInput;
+
+  if (isTypingNow) {
+    renderSentenceResultsOnly(filterText);
+    return;
+  }
 
   const toolbar = `
     <div class="list-toolbar">
@@ -1793,24 +1814,65 @@ function renderSentencesTab(filterText) {
       </div>
       ${state.sentences.length > 0 ? `<button class="btn ghost sm" id="sent-clear-all"><i class="ti ti-trash"></i> 전체 삭제</button>` : ''}
     </div>
+    <div id="sent-results"></div>
   `;
+  container.innerHTML = toolbar;
+  renderSentenceResultsOnly(filterText);
+
+  const searchInput = document.getElementById('sent-search');
+  if (searchInput) {
+    let debounceTimer = null;
+    searchInput.addEventListener('input', (e) => {
+      const value = e.target.value;
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => renderSentenceResultsOnly(value), 250);
+    });
+    if (filterText) {
+      searchInput.focus();
+      searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+    }
+  }
+  const clearAllBtn = document.getElementById('sent-clear-all');
+  if (clearAllBtn) {
+    clearAllBtn.addEventListener('click', async () => {
+      if (!window.confirm('저장된 문장을 모두 삭제할까요? 이 작업은 되돌릴 수 없어요.')) return;
+      state.sentences = [];
+      await storageSet(STORAGE_KEYS.SENTENCES, state.sentences);
+      updateBadgeCounts();
+      renderSentencesTab();
+      showToast('문장함을 비웠어요.');
+    });
+  }
+}
+
+// 검색 결과 목록만 다시 그린다 (검색창 input 자체는 건드리지 않음 → 한글 조합 안전)
+function renderSentenceResultsOnly(filterText) {
+  const resultsEl = document.getElementById('sent-results');
+  if (!resultsEl) return;
+
+  const filter = (filterText || '').trim().toLowerCase();
+  const list = filter
+    ? state.sentences.filter(s =>
+        s.source.toLowerCase().includes(filter) ||
+        (s.mine || '').toLowerCase().includes(filter))
+    : state.sentences;
 
   if (state.sentences.length === 0) {
-    container.innerHTML = toolbar + `
+    resultsEl.innerHTML = `
       <div class="empty-state">
         <i class="ti ti-notes"></i>
         <div class="t1">아직 저장된 문장이 없어요</div>
         <div class="t2">7점 미만을 받은 문장에서 저장 버튼을 누르면 여기에 모여요.</div>
       </div>`;
   } else if (list.length === 0) {
-    container.innerHTML = toolbar + `
+    resultsEl.innerHTML = `
       <div class="empty-state">
         <i class="ti ti-search"></i>
         <div class="t1">검색 결과가 없어요</div>
         <div class="t2">다른 검색어로 찾아보세요.</div>
       </div>`;
   } else {
-    container.innerHTML = toolbar + `<div class="sent-list">${list.map(s => {
+    resultsEl.innerHTML = `<div class="sent-list">${list.map(s => {
       const cls = scoreClass(s.score);
       const modeLabel = s.mode === 'write' ? '영작' : '해석';
       const date = new Date(s.createdAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -1831,41 +1893,14 @@ function renderSentencesTab(filterText) {
     }).join('')}</div>`;
   }
 
-  const searchInput = document.getElementById('sent-search');
-  if (searchInput) {
-    let composing = false;
-    searchInput.addEventListener('compositionstart', () => { composing = true; });
-    searchInput.addEventListener('compositionend', (e) => {
-      composing = false;
-      renderSentencesTab(e.target.value);
-    });
-    searchInput.addEventListener('input', (e) => {
-      if (composing) return; // 한글 자모 조합 중에는 리렌더링하지 않음 (IME 포커스 유지)
-      renderSentencesTab(e.target.value);
-    });
-    if (filterText) {
-      searchInput.focus();
-      searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
-    }
-  }
-  const clearAllBtn = document.getElementById('sent-clear-all');
-  if (clearAllBtn) {
-    clearAllBtn.addEventListener('click', async () => {
-      if (!window.confirm('저장된 문장을 모두 삭제할까요? 이 작업은 되돌릴 수 없어요.')) return;
-      state.sentences = [];
-      await storageSet(STORAGE_KEYS.SENTENCES, state.sentences);
-      updateBadgeCounts();
-      renderSentencesTab();
-      showToast('문장함을 비웠어요.');
-    });
-  }
-  container.querySelectorAll('[data-del-sent]').forEach(btn => {
+  resultsEl.querySelectorAll('[data-del-sent]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const id = btn.getAttribute('data-del-sent');
       state.sentences = state.sentences.filter(s => s.id !== id);
       await storageSet(STORAGE_KEYS.SENTENCES, state.sentences);
       updateBadgeCounts();
-      renderSentencesTab(searchInput ? searchInput.value : '');
+      const searchInput = document.getElementById('sent-search');
+      renderSentenceResultsOnly(searchInput ? searchInput.value : '');
       showToast('문장을 삭제했어요.');
     });
   });
