@@ -74,29 +74,26 @@ issues, wrong_words는 해당 사항 없으면 빈 배열로 두세요. wrong_wo
   }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
+    const response = await callClaudeWithRetry({
+      apiKey,
+      body: {
         model: 'claude-sonnet-4-6',
         max_tokens: 1000,
         system: systemPrompt,
         messages: [{ role: 'user', content: userContent }],
-      }),
+      },
     });
 
     if (!response.ok) {
       const errText = await response.text();
+      console.error('[grade] Claude API 응답 오류', response.status, errText);
       return res.status(502).json({ error: 'Claude API 오류', detail: errText });
     }
 
     const data = await response.json();
     const textBlock = (data.content || []).find((b) => b.type === 'text');
     if (!textBlock) {
+      console.error('[grade] 응답에 텍스트 블록 없음', JSON.stringify(data));
       return res.status(502).json({ error: '응답에 텍스트가 없습니다.' });
     }
 
@@ -108,8 +105,12 @@ issues, wrong_words는 해당 사항 없으면 빈 배열로 두세요. wrong_wo
       parsed = JSON.parse(clean);
     } catch (e) {
       const match = clean.match(/\{[\s\S]*\}/);
-      if (match) parsed = JSON.parse(match[0]);
-      else return res.status(502).json({ error: '채점 결과를 해석할 수 없습니다.' });
+      if (match) {
+        parsed = JSON.parse(match[0]);
+      } else {
+        console.error('[grade] JSON 파싱 실패. 원문:', clean);
+        return res.status(502).json({ error: '채점 결과를 해석할 수 없습니다.' });
+      }
     }
 
     parsed.score = Math.max(0, Math.min(10, Math.round(Number(parsed.score) || 0)));
@@ -120,6 +121,38 @@ issues, wrong_words는 해당 사항 없으면 빈 배열로 두세요. wrong_wo
 
     return res.status(200).json(parsed);
   } catch (e) {
-    return res.status(500).json({ error: '서버 오류', detail: String(e) });
+    console.error('[grade] 예외 발생:', e && e.stack ? e.stack : e);
+    return res.status(500).json({ error: '서버 오류', detail: String(e && e.message ? e.message : e) });
   }
+}
+
+// Claude API 호출. 5xx/429(일시적 오류)나 네트워크 자체 실패일 때만 최대 2회까지 재시도한다.
+// 4xx(요청 자체가 잘못된 경우)는 재시도해도 의미가 없으므로 바로 반환한다.
+async function callClaudeWithRetry({ apiKey, body }, maxRetries = 2) {
+  let lastError = null;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify(body),
+      });
+
+      const isRetryable = response.status === 429 || response.status >= 500;
+      if (response.ok || !isRetryable || attempt === maxRetries) {
+        return response;
+      }
+      console.error(`[grade] Claude API ${response.status} — 재시도 ${attempt + 1}/${maxRetries}`);
+    } catch (e) {
+      lastError = e;
+      console.error(`[grade] fetch 실패 — 재시도 ${attempt + 1}/${maxRetries}`, e && e.message);
+      if (attempt === maxRetries) throw e;
+    }
+    await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
+  }
+  if (lastError) throw lastError;
 }
