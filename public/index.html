@@ -269,9 +269,31 @@
   }
   .study-card .src-text{
     font-family: var(--font-serif); font-size: 21px; line-height:1.55; color: var(--ink);
-    margin: 0 0 22px;
+    margin: 0 0 14px;
   }
   .panel#tab-interpret .study-card .src-text{ font-style: italic; }
+
+  .reveal-toggle{
+    appearance:none; border:1px solid var(--rule-strong); background: var(--paper-2);
+    color: var(--ink-soft); cursor:pointer; border-radius:8px;
+    font-family: var(--font-sans); font-size:12px; font-weight:600;
+    padding:7px 12px; display:inline-flex; align-items:center; gap:6px;
+    margin-bottom: 14px; transition: all .15s;
+  }
+  .reveal-toggle i{ font-size:14px; }
+  .reveal-toggle:hover{ background: var(--rule); color: var(--ink); }
+  .reveal-toggle.active{ background: var(--gold-bg); border-color: var(--gold); color: var(--gold); }
+  .reveal-box{
+    background: var(--gold-bg); border:1px solid var(--rule-strong); border-radius:10px;
+    padding: 13px 15px; margin-bottom: 18px;
+  }
+  .reveal-label{
+    font-size:10.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
+    color: var(--gold); display:block; margin-bottom:6px;
+  }
+  .reveal-text{
+    font-family: var(--font-serif); font-size:16px; line-height:1.55; color: var(--ink); margin:0;
+  }
 
   .answer-row{ display:flex; gap:10px; align-items:stretch; }
   .answer-row textarea{
@@ -461,6 +483,7 @@
     .brand h1{ font-size:18px; }
     .study-card{ padding: 20px 18px 18px; }
     .study-card .src-text{ font-size:18px; }
+    .reveal-text{ font-size:14.5px; }
     nav.tabs{ gap:3px; padding:3px; }
     nav.tabs button{
       min-width: 0; flex: 1 1 0;
@@ -1278,6 +1301,14 @@ function renderWriteStudy() {
       <div class="src-label"><i class="ti ti-language" style="font-size:13px;"></i> 한국어 해석</div>
       <p class="src-text">${escapeHtml(krPrompt)}</p>
 
+      <button class="reveal-toggle" id="write-reveal-btn" type="button">
+        <i class="ti ti-eye"></i> 원문 보기
+      </button>
+      <div class="reveal-box" id="write-reveal-box" style="display:none;">
+        <span class="reveal-label">영어 원문</span>
+        <p class="reveal-text">${escapeHtml(sess.sentences[idx])}</p>
+      </div>
+
       <div class="answer-row">
         <textarea id="write-answer" placeholder="위 해석에 맞는 영어 문장을 작성해보세요" ${result ? 'readonly' : ''}>${result ? escapeHtml(sess.lastUserAnswer || '') : ''}</textarea>
         <button class="send-btn" id="write-submit" ${result ? 'disabled' : ''} aria-label="제출"><span>Enter</span><i class="ti ti-corner-down-left"></i></button>
@@ -1292,6 +1323,17 @@ function renderWriteStudy() {
   `;
 
   document.getElementById('write-restart').addEventListener('click', () => confirmRestart('write'));
+
+  const revealBtn = document.getElementById('write-reveal-btn');
+  const revealBox = document.getElementById('write-reveal-box');
+  revealBtn.addEventListener('click', () => {
+    const showing = revealBox.style.display !== 'none';
+    revealBox.style.display = showing ? 'none' : 'block';
+    revealBtn.classList.toggle('active', !showing);
+    revealBtn.innerHTML = showing
+      ? '<i class="ti ti-eye"></i> 원문 보기'
+      : '<i class="ti ti-eye-off"></i> 원문 숨기기';
+  });
 
   const answerBox = document.getElementById('write-answer');
   const submitBtn = document.getElementById('write-submit');
