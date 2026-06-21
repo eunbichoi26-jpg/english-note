@@ -78,7 +78,7 @@ issues, wrong_words는 해당 사항 없으면 빈 배열로 두세요. wrong_wo
       apiKey,
       body: {
         model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
+        max_tokens: 2000,
         system: systemPrompt,
         messages: [{ role: 'user', content: userContent }],
       },
