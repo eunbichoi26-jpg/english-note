@@ -14,7 +14,7 @@ function getClient() {
   return createClient(supabaseUrl, supabaseKey);
 }
 
-const ALLOWED_KEYS = new Set(['session:write', 'session:interpret', 'words:all', 'sentences:all', 'meta:lastTab']);
+const ALLOWED_KEYS = new Set(['session:write', 'session:interpret', 'words:all', 'sentences:all', 'meta:lastTab', 'galaxy:progress']);
 
 export default async function handler(req, res) {
   let supabase;
@@ -27,6 +27,7 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     const { key } = req.query;
     if (!key || !ALLOWED_KEYS.has(key)) {
+      console.error('[storage GET] 유효하지 않은 key:', JSON.stringify(key), 'query:', JSON.stringify(req.query));
       return res.status(400).json({ error: '유효하지 않은 key입니다.' });
     }
     const { data, error } = await supabase
@@ -35,7 +36,10 @@ export default async function handler(req, res) {
       .eq('key', key)
       .maybeSingle();
 
-    if (error) return res.status(500).json({ error: error.message });
+    if (error) {
+      console.error('[storage GET] Supabase 오류:', error.message);
+      return res.status(500).json({ error: error.message });
+    }
     return res.status(200).json({ value: data ? data.value : null });
   }
 
