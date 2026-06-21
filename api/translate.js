@@ -23,18 +23,17 @@ export default async function handler(req, res) {
   const numbered = sentences.map((s, i) => `${i + 1}. ${s}`).join('\n');
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
+    const response = await callClaudeWithRetry({
+      apiKey,
+      body: {
         model: 'claude-sonnet-4-6',
         max_tokens: 4000,
         system: `여러 영어 문장을 자연스러운 한국어로 번역하는 번역기입니다.
 입력은 번호가 매겨진 영어 문장 목록입니다. 각 문장을 같은 번호의 한국어 번역으로 출력하세요.
+
+중요: 사람 이름(인명)은 번역하거나 한글로 음역하지 말고, 원문의 영문 철자 그대로 남겨두세요.
+예: "Lacey Duvall" → 그대로 "Lacey Duvall" (✕ "레이시 듀발"로 음역하지 않음)
+지명, 회사명 등 다른 고유명사는 자연스러운 한국어 표기(외래어 표기법)를 따르되, 사람 이름만 예외로 원문 그대로 둡니다.
 
 반드시 아래 형식만 출력하세요. 다른 설명, 인사말, 마크다운 없이:
 1. (1번 문장의 한국어 번역)
@@ -43,17 +42,19 @@ export default async function handler(req, res) {
 
 입력된 문장 개수와 출력 줄 수가 반드시 같아야 합니다. 번호를 빠뜨리거나 합치지 마세요.`,
         messages: [{ role: 'user', content: numbered }],
-      }),
+      },
     });
 
     if (!response.ok) {
       const errText = await response.text();
+      console.error('[translate] Claude API 응답 오류', response.status, errText);
       return res.status(502).json({ error: 'Claude API 오류', detail: errText });
     }
 
     const data = await response.json();
     const textBlock = (data.content || []).find((b) => b.type === 'text');
     if (!textBlock) {
+      console.error('[translate] 응답에 텍스트 블록 없음', JSON.stringify(data));
       return res.status(502).json({ error: '번역 응답이 없습니다.' });
     }
 
@@ -71,6 +72,37 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ translations: results });
   } catch (e) {
-    return res.status(500).json({ error: '서버 오류', detail: String(e) });
+    console.error('[translate] 예외 발생:', e && e.stack ? e.stack : e);
+    return res.status(500).json({ error: '서버 오류', detail: String(e && e.message ? e.message : e) });
   }
+}
+
+// Claude API 호출. 5xx/429(일시적 오류)나 네트워크 자체 실패일 때만 최대 2회까지 재시도한다.
+async function callClaudeWithRetry({ apiKey, body }, maxRetries = 2) {
+  let lastError = null;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify(body),
+      });
+
+      const isRetryable = response.status === 429 || response.status >= 500;
+      if (response.ok || !isRetryable || attempt === maxRetries) {
+        return response;
+      }
+      console.error(`[translate] Claude API ${response.status} — 재시도 ${attempt + 1}/${maxRetries}`);
+    } catch (e) {
+      lastError = e;
+      console.error(`[translate] fetch 실패 — 재시도 ${attempt + 1}/${maxRetries}`, e && e.message);
+      if (attempt === maxRetries) throw e;
+    }
+    await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
+  }
+  if (lastError) throw lastError;
 }
