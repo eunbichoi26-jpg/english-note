@@ -106,6 +106,105 @@
   .panel.active{ display:block; animation: fadeIn .25s ease; }
   @keyframes fadeIn{ from{opacity:0; transform: translateY(4px);} to{opacity:1; transform:none;} }
 
+  /* ---------- 서재 미니 카드 (헤더 아래, 버튼형) ---------- */
+  .library-mini{
+    width:100%; appearance:none; border:1px solid var(--rule-strong); cursor:pointer; text-align:left;
+    background: var(--card);
+    border-radius: 14px; padding: 13px 16px; margin-bottom: 22px;
+    display:flex; align-items:center; gap:10px;
+    box-shadow: var(--shadow-pin); transition: transform .12s, opacity .15s;
+  }
+  .library-mini:hover{ opacity:0.92; }
+  .library-mini:active{ transform: scale(0.99); }
+  .library-mini-icon{
+    width:30px; height:30px; border-radius:50%; flex:none;
+    background: var(--gold-bg); color: var(--gold);
+    display:flex; align-items:center; justify-content:center; font-size:15px;
+  }
+  .library-mini-label{ flex:1; font-size:13px; font-weight:600; color: var(--ink); }
+  .library-mini-sub{ font-size:11.5px; color: var(--ink-soft); margin-top:1px; }
+  .library-mini-arrow{ color: var(--ink-faint); font-size:15px; flex:none; }
+
+  /* ---------- 서재 풀 탭 ---------- */
+  .library-full{ position: relative; }
+  .library-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-bottom: 18px; flex-wrap:wrap;
+  }
+  .library-head-title{ font-family: var(--font-kr); font-size:16px; font-weight:700; color: var(--ink); }
+  .library-head-sub{ font-size:12.5px; color: var(--ink-soft); margin-top:2px; }
+  .library-stats{ display:flex; gap:10px; flex-wrap:wrap; }
+  .library-stat{
+    background: var(--paper-2); border:1px solid var(--rule); border-radius:10px;
+    padding:8px 16px; text-align:center; min-width:84px;
+  }
+  .library-stat .v{ font-size:18px; font-weight:700; color: var(--ink); font-family: var(--font-serif); }
+  .library-stat .l{ font-size:10.5px; color: var(--ink-soft); margin-top:1px; }
+
+  .shelf-progress{
+    display:flex; align-items:center; gap:10px; margin-bottom: 20px;
+    font-size:12.5px; color: var(--ink-soft); font-weight:600;
+  }
+  .shelf-progress .track{ flex:1; height:6px; background: var(--paper-2); border-radius:99px; overflow:hidden; border:1px solid var(--rule); }
+  .shelf-progress .fill{ height:100%; background: var(--gold); border-radius:99px; transition: width .3s ease; }
+
+  .bookshelf{
+    background: var(--paper-2); border:1px solid var(--rule); border-radius:16px;
+    padding: 18px; box-shadow: var(--shadow-pin); margin-bottom: 22px;
+  }
+  .bookshelf-grid{
+    display:grid; grid-template-columns: repeat(10, 1fr); gap:6px;
+  }
+  .book-slot{
+    aspect-ratio: 3 / 4; border-radius:5px; position:relative; cursor:default;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .book-slot.empty{
+    border: 1.5px dashed var(--rule-strong); background: var(--paper);
+  }
+  .book-slot.filled{
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08), var(--shadow-pin);
+    cursor: pointer; animation: bookPop .35s ease-out backwards;
+  }
+  .book-slot.filled:hover{ transform: translateY(-2px); }
+  .book-slot.filled .spine-line{
+    position:absolute; top:8%; bottom:8%; left:50%; width:1px; background: rgba(255,255,255,0.35);
+  }
+  @keyframes bookPop{
+    0%{ transform: scale(0.4) translateY(6px); opacity:0; }
+    100%{ transform: scale(1) translateY(0); opacity:1; }
+  }
+
+  .library-archive{ margin-top: 8px; }
+  .library-archive-title{ font-size:12px; font-weight:700; color: var(--ink-soft); margin-bottom:10px; }
+  .library-archive-grid{ display:flex; flex-wrap:wrap; gap:10px; }
+  .archive-card{
+    background: var(--card); border:1px solid var(--rule); border-radius:10px;
+    padding:10px 14px; display:flex; align-items:center; gap:8px; min-width:120px;
+  }
+  .archive-card i{ color: var(--gold); font-size:16px; }
+  .archive-card .n{ font-size:13px; font-weight:700; color: var(--ink); }
+  .archive-card .l{ font-size:10.5px; color: var(--ink-soft); }
+
+  .book-modal-backdrop{
+    position: fixed; inset:0; background: rgba(42,38,32,0.45);
+    display:flex; align-items:center; justify-content:center; z-index: 1000; padding:24px;
+  }
+  .book-modal{
+    background: var(--card); border-radius:16px; padding:24px; max-width:360px; width:100%;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  }
+  .book-modal-cover{
+    width:64px; height:84px; border-radius:6px; margin-bottom:14px;
+    display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px;
+  }
+  .book-modal h3{ font-family: var(--font-kr); font-size:16px; margin:0 0 6px; }
+  .book-modal .meta{ font-size:12px; color: var(--ink-soft); margin-bottom:14px; }
+  .book-modal .preview{
+    font-family: var(--font-serif); font-size:13.5px; color: var(--ink-soft);
+    line-height:1.6; border-top:1px dashed var(--rule-strong); padding-top:12px; font-style:italic;
+  }
+
   /* ---------- generic card ---------- */
   .card{
     background: var(--card); border:1px solid var(--rule); border-radius:16px;
@@ -164,7 +263,7 @@
   }
   .panel#tab-interpret .study-card .src-text{ font-style: italic; }
 
-  .answer-row{ display:flex; gap:10px; align-items:flex-start; }
+  .answer-row{ display:flex; gap:10px; align-items:stretch; }
   .answer-row textarea{
     flex:1; min-height:64px; resize:vertical;
     border:1.5px solid var(--rule-strong); border-radius:10px; background: var(--paper);
@@ -174,13 +273,37 @@
   .panel#tab-write .answer-row textarea{ font-family: var(--font-sans); }
   .answer-row textarea:focus{ outline:2px solid var(--navy); outline-offset:1px; }
   .answer-row .send-btn{
-    flex:none; width:46px; height:46px; border-radius:10px; border:1px solid var(--ink);
-    background:var(--ink); color:var(--paper); cursor:pointer; display:flex; align-items:center; justify-content:center;
-    font-size:18px; align-self:flex-end;
+    flex:none; width:auto; min-width:68px; min-height:46px; align-self:flex-start;
+    padding:8px 16px; border-radius:10px;
+    border:1.5px solid var(--rule-strong); background: var(--card); color: var(--ink-faint);
+    cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    font-family: var(--font-sans); font-size:12.5px; font-weight:700;
+    transition: all .2s ease; white-space:nowrap;
   }
-  .answer-row .send-btn:disabled{ opacity:0.35; cursor:not-allowed; }
+  .answer-row .send-btn i{ font-size:16px; }
+  .answer-row .send-btn:not(:disabled){
+    border-color: var(--rule-strong); background: var(--paper-2); color: var(--ink-soft);
+  }
+  .answer-row .send-btn:not(:disabled):hover{
+    border-color: var(--ink-soft); background: var(--rule); color: var(--ink);
+  }
+  .answer-row .send-btn:disabled{ cursor:not-allowed; }
   .hint-row{ font-size:11.5px; color: var(--ink-faint); margin-top:8px; }
   .hint-row kbd{ background: var(--paper-2); border:1px solid var(--rule); border-radius:4px; padding:1px 6px; font-family:var(--font-sans); }
+  .hint-row-flex{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    margin-top:8px; flex-wrap:wrap;
+  }
+  .hint-row-flex .hint-row{ margin-top:0; }
+  .skip-btn{
+    appearance:none; border:none; background:transparent; cursor:pointer;
+    font-family: var(--font-sans); font-size:11.5px; font-weight:600; color: var(--ink-soft);
+    display:inline-flex; align-items:center; gap:5px; padding:4px 2px;
+    border-bottom: 1px dashed var(--rule-strong); flex:none;
+    transition: color .15s;
+  }
+  .skip-btn:hover{ color: var(--ink); border-bottom-color: var(--ink-soft); }
+  .skip-btn i{ font-size:13px; }
 
   /* ---------- grading result ---------- */
   .grade-wrap{ margin-top: 22px; border-top: 1px dashed var(--rule-strong); padding-top: 20px; }
@@ -328,10 +451,25 @@
     .brand h1{ font-size:18px; }
     .study-card{ padding: 20px 18px 18px; }
     .study-card .src-text{ font-size:18px; }
-    nav.tabs button{ min-width: 90px; font-size:12px; padding:10px 6px;}
-    nav.tabs button span.full{ display:none; }
+    nav.tabs{ gap:3px; padding:3px; }
+    nav.tabs button{
+      min-width: 0; flex: 1 1 0;
+      font-size:11px; padding:9px 4px; gap:4px;
+    }
+    nav.tabs button i{ font-size:14px; }
+    nav.tabs button .count{ font-size:9.5px; padding:0 5px; }
+    .answer-row .send-btn{ min-width:52px; min-height:42px; padding:6px 10px; font-size:11px; gap:2px; }
+    .answer-row .send-btn i{ font-size:14px; }
+    .bookshelf{ padding: 12px; }
+    .bookshelf-grid{ gap:4px; }
+    .library-head{ flex-direction:column; align-items:flex-start; }
     .card{ padding:16px; }
     .grade-head{ flex-wrap:wrap; }
+  }
+
+  @media (max-width: 380px){
+    nav.tabs button{ font-size:10px; }
+    nav.tabs button span.full{ display:none; }
   }
 </style>
 </head>
@@ -352,15 +490,18 @@
       </div>
     </header>
 
+    <div id="libraryCard"></div>
+
     <nav class="tabs">
-      <button class="active" data-tab="tab-write"><i class="ti ti-pencil"></i><span class="full">영작 연습</span></button>
+      <button class="active" data-tab="tab-library"><i class="ti ti-book-2"></i><span class="full">내 서재</span></button>
+      <button data-tab="tab-write"><i class="ti ti-pencil"></i><span class="full">영작 연습</span></button>
       <button data-tab="tab-interpret"><i class="ti ti-language"></i><span class="full">해석 연습</span></button>
       <button data-tab="tab-words"><i class="ti ti-bookmark"></i><span class="full">틀린 단어장</span><span class="count" id="wordCount" style="display:none;">0</span></button>
       <button data-tab="tab-sentences"><i class="ti ti-notes"></i><span class="full">틀린 문장함</span><span class="count" id="sentCount" style="display:none;">0</span></button>
     </nav>
 
     <!-- ===================== TAB 1: 영작 연습 ===================== -->
-    <section class="panel active" id="tab-write">
+    <section class="panel" id="tab-write">
       <div id="writeSetup"></div>
       <div id="writeStudy" style="display:none;"></div>
     </section>
@@ -369,6 +510,11 @@
     <section class="panel" id="tab-interpret">
       <div id="interpretSetup"></div>
       <div id="interpretStudy" style="display:none;"></div>
+    </section>
+
+    <!-- ===================== TAB L: 내 서재 ===================== -->
+    <section class="panel active" id="tab-library">
+      <div id="libraryFullContent"></div>
     </section>
 
     <!-- ===================== TAB 3: 틀린 단어장 ===================== -->
@@ -405,14 +551,16 @@ const STORAGE_KEYS = {
   WORDS: 'words:all',
   SENTENCES: 'sentences:all',
   LAST_TAB: 'meta:lastTab',
+  GALAXY: 'galaxy:progress',
 };
 
 let state = {
-  lastTab: 'tab-write',
+  lastTab: 'tab-library',
   write: null,      // { sourceText, sentences:[], idx, results:{idx:{...}}, finished:bool }
   interpret: null,
   words: [],         // [{id, word, meaning, example, wrongForm, source, createdAt}]
   sentences: [],     // [{id, mode, source, mine, corrected, score, issues, createdAt}]
+  galaxy: {},        // { "2026-06-21": 5, "2026-06-20": 7, ... } 날짜별 완료 문장 수
   loadedOnce: false,
 };
 
@@ -732,27 +880,31 @@ async function switchTab(tabId, persist) {
 
   if (tabId === 'tab-words') renderWordsTab();
   if (tabId === 'tab-sentences') renderSentencesTab();
+  if (tabId === 'tab-library') renderLibraryFullTab();
 }
 
 /* =========================================================
    초기 로드
    ========================================================= */
 async function loadAll() {
-  const [lastTab, writeSession, interpretSession, words, sentences] = await Promise.all([
-    storageGet(STORAGE_KEYS.LAST_TAB, 'tab-write'),
+  const [lastTab, writeSession, interpretSession, words, sentences, galaxy] = await Promise.all([
+    storageGet(STORAGE_KEYS.LAST_TAB, 'tab-library'),
     storageGet(STORAGE_KEYS.WRITE_SESSION, null),
     storageGet(STORAGE_KEYS.INTERPRET_SESSION, null),
     storageGet(STORAGE_KEYS.WORDS, []),
     storageGet(STORAGE_KEYS.SENTENCES, []),
+    storageGet(STORAGE_KEYS.GALAXY, {}),
   ]);
-  state.lastTab = lastTab || 'tab-write';
+  state.lastTab = lastTab || 'tab-library';
   state.write = writeSession;
   state.interpret = interpretSession;
   state.words = words || [];
   state.sentences = sentences || [];
+  state.galaxy = galaxy || {};
   state.loadedOnce = true;
 
   updateBadgeCounts();
+  renderLibraryCard();
   renderWriteTab();
   renderInterpretTab();
   await switchTab(state.lastTab, false);
@@ -774,6 +926,202 @@ function updateBadgeCounts() {
   } else {
     sc.style.display = 'none';
   }
+}
+
+/* =========================================================
+   내 서재 — 채점 완료 문장 10개마다 책 1권이 책장에 꽂힌다.
+   책장 1개 = 100권 (1,000문장), 서재(도서관) 1개 = 책장 1개.
+   서재는 최대 10개까지 (총 10,000문장).
+   ========================================================= */
+const SENTENCES_PER_BOOK = 10;
+const BOOKS_PER_LIBRARY = 100;
+const MAX_LIBRARIES = 10;
+
+// 책 표지 색상 팔레트 (사이트 톤 안에서 순환)
+const BOOK_COLORS = [
+  { bg: '#C73E2E', label: '#FBEEEA' }, // red
+  { bg: '#2B3A4A', label: '#E6EBEF' }, // navy
+  { bg: '#B8862E', label: '#F6EBD4' }, // gold
+  { bg: '#3F6B3A', label: '#E7EFE2' }, // green
+  { bg: '#6B5B95', label: '#EDEAF5' }, // violet
+  { bg: '#A35D34', label: '#F3E6DA' }, // terracotta
+];
+
+function totalSentenceCount() {
+  return Object.values(state.galaxy || {}).reduce((sum, n) => sum + n, 0);
+}
+
+// 누적치를 보고 "현재 몇 번째 서재, 그 안에서 몇 권째 책장이 찼는지, 지금 만들고 있는 책 안에서 몇 문장째인지"를 계산
+function getLibraryProgress() {
+  const total = totalSentenceCount();
+  const totalBooks = Math.floor(total / SENTENCES_PER_BOOK);
+  const currentBookFilled = total % SENTENCES_PER_BOOK; // 지금 만들고 있는 책에 채워진 문장 수 (0~9)
+
+  const libraryIndex = Math.min(Math.floor(totalBooks / BOOKS_PER_LIBRARY), MAX_LIBRARIES - 1);
+  const booksInCurrentLibrary = totalBooks - libraryIndex * BOOKS_PER_LIBRARY;
+  const archivedLibraries = Math.min(Math.floor(totalBooks / BOOKS_PER_LIBRARY), MAX_LIBRARIES);
+
+  return {
+    total,
+    totalBooks,
+    currentBookFilled,
+    libraryIndex,                 // 지금 채우고 있는 책장의 인덱스 (0-based)
+    booksInCurrentLibrary,        // 그 책장에 꽂힌 책 수 (0~100)
+    archivedLibraries,            // 완전히 채워서 보관된 서재 수
+    allLibrariesFull: totalBooks >= MAX_LIBRARIES * BOOKS_PER_LIBRARY,
+  };
+}
+
+function todayKey() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+// 채점이 완료된 문장 1개를 누적에 더한다. 건너뛴 문장은 호출하지 않는다.
+async function addLibraryProgress() {
+  const key = todayKey();
+  const beforeTotal = totalSentenceCount();
+  state.galaxy[key] = (state.galaxy[key] || 0) + 1;
+  await storageSet(STORAGE_KEYS.GALAXY, state.galaxy);
+
+  const afterTotal = beforeTotal + 1;
+  const justFinishedBook = Math.floor(afterTotal / SENTENCES_PER_BOOK) > Math.floor(beforeTotal / SENTENCES_PER_BOOK);
+
+  renderLibraryCard();
+  if (document.getElementById('tab-library')?.classList.contains('active')) renderLibraryFullTab();
+
+  if (justFinishedBook) {
+    showToast('새 책이 한 권 완성되어 책장에 꽂혔어요', false);
+  }
+}
+
+/* ---------- 미니 카드 (헤더 아래, 오늘 진행 요약) ---------- */
+function renderLibraryCard() {
+  const container = document.getElementById('libraryCard');
+  if (!container) return;
+
+  const progress = getLibraryProgress();
+  const todayCount = state.galaxy[todayKey()] || 0;
+
+  const label = progress.allLibrariesFull
+    ? `모든 서재를 채웠어요 (총 ${progress.total}문장)`
+    : `${progress.currentBookFilled}/${SENTENCES_PER_BOOK}문장 — 책 한 권 완성까지`;
+  const sub = `누적 ${progress.totalBooks}권 · 오늘 ${todayCount}문장 학습`;
+
+  container.innerHTML = `
+    <button class="library-mini" id="libraryMiniBtn" type="button">
+      <span class="library-mini-icon"><i class="ti ti-book-2"></i></span>
+      <span style="flex:1;">
+        <span class="library-mini-label">${label}</span>
+        <div class="library-mini-sub">${sub}</div>
+      </span>
+      <span class="library-mini-arrow"><i class="ti ti-chevron-right"></i></span>
+    </button>
+  `;
+  const btn = document.getElementById('libraryMiniBtn');
+  if (btn) btn.addEventListener('click', () => switchTab('tab-library', true));
+}
+
+/* ---------- 풀 화면 (내 서재 탭) ---------- */
+function renderLibraryFullTab() {
+  const container = document.getElementById('libraryFullContent');
+  if (!container) return;
+
+  const progress = getLibraryProgress();
+
+  const slotsHtml = [];
+  for (let i = 0; i < BOOKS_PER_LIBRARY; i++) {
+    if (i < progress.booksInCurrentLibrary) {
+      const globalBookIndex = progress.libraryIndex * BOOKS_PER_LIBRARY + i;
+      const color = BOOK_COLORS[globalBookIndex % BOOK_COLORS.length];
+      slotsHtml.push(`
+        <div class="book-slot filled" style="background:${color.bg}; animation-delay:${Math.min(i, 20) * 25}ms;" data-book-index="${globalBookIndex}">
+          <div class="spine-line"></div>
+        </div>
+      `);
+    } else {
+      slotsHtml.push(`<div class="book-slot empty"></div>`);
+    }
+  }
+
+  const archiveHtml = [];
+  for (let i = 0; i < progress.archivedLibraries; i++) {
+    if (i === progress.libraryIndex && !progress.allLibrariesFull) continue; // 지금 채우는 중인 서재는 보관함에 안 넣음
+    archiveHtml.push(`
+      <div class="archive-card">
+        <i class="ti ti-building-bank"></i>
+        <div>
+          <div class="n">${(i + 1) * BOOKS_PER_LIBRARY}권 도서관</div>
+          <div class="l">서재 ${i + 1}번 완성</div>
+        </div>
+      </div>
+    `);
+  }
+
+  const captionText = progress.allLibrariesFull
+    ? `10개의 서재를 모두 채웠어요 — 총 ${progress.total}문장을 학습했어요!`
+    : `${progress.libraryIndex + 1}번째 서재 — ${progress.booksInCurrentLibrary}/${BOOKS_PER_LIBRARY}권`;
+
+  container.innerHTML = `
+    <div class="library-full">
+      <div class="library-head">
+        <div>
+          <div class="library-head-title">내 서재</div>
+          <div class="library-head-sub">${captionText}</div>
+        </div>
+        <div class="library-stats">
+          <div class="library-stat"><div class="v">${progress.total}</div><div class="l">누적 문장</div></div>
+          <div class="library-stat"><div class="v">${progress.totalBooks}</div><div class="l">완성한 책</div></div>
+        </div>
+      </div>
+
+      <div class="shelf-progress">
+        <span>${progress.currentBookFilled}/${SENTENCES_PER_BOOK}문장</span>
+        <div class="track"><div class="fill" style="width:${(progress.currentBookFilled / SENTENCES_PER_BOOK) * 100}%;"></div></div>
+        <span>다음 책까지</span>
+      </div>
+
+      <div class="bookshelf">
+        <div class="bookshelf-grid">${slotsHtml.join('')}</div>
+      </div>
+
+      ${archiveHtml.length > 0 ? `
+        <div class="library-archive">
+          <div class="library-archive-title">완성된 도서관</div>
+          <div class="library-archive-grid">${archiveHtml.join('')}</div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  container.querySelectorAll('.book-slot.filled').forEach(el => {
+    el.addEventListener('click', () => showBookModal(parseInt(el.dataset.bookIndex, 10)));
+  });
+}
+
+// 책 한 권의 정보를 보여주는 모달. 그 책에 해당하는 10문장 구간의 첫 문장을 미리보기로 보여준다.
+function showBookModal(globalBookIndex) {
+  const color = BOOK_COLORS[globalBookIndex % BOOK_COLORS.length];
+  const startSentenceNum = globalBookIndex * SENTENCES_PER_BOOK + 1;
+  const endSentenceNum = startSentenceNum + SENTENCES_PER_BOOK - 1;
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'book-modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="book-modal">
+      <div class="book-modal-cover" style="background:${color.bg}; color:${color.label};"><i class="ti ti-book-2"></i></div>
+      <h3>${globalBookIndex + 1}번째 책</h3>
+      <div class="meta">학습 문장 ${startSentenceNum}~${endSentenceNum}번째</div>
+      <div class="preview">이 책은 ${SENTENCES_PER_BOOK}개의 문장을 채점까지 완료하며 채워졌어요. 꾸준히 쌓아온 기록이에요.</div>
+    </div>
+  `;
+  backdrop.addEventListener('click', (e) => {
+    if (e.target === backdrop) backdrop.remove();
+  });
+  document.body.appendChild(backdrop);
 }
 
 /* =========================================================
@@ -813,7 +1161,8 @@ function buildPasteSetupHTML(mode) {
         <span id="${mode}-charcount">0 / 10,000자</span>
         <span id="${mode}-sentpreview"></span>
       </div>
-      <div style="margin-top:16px; display:flex; justify-content:flex-end;">
+      <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+        <span class="hint-row" style="margin-top:0;"><kbd>Ctrl</kbd>+<kbd>Enter</kbd>(Mac은 <kbd>⌘</kbd>+<kbd>Enter</kbd>)로 바로 시작할 수 있어요</span>
         <button class="btn" id="${mode}-start-btn" disabled><i class="ti ti-player-play"></i> 학습 시작</button>
       </div>
     </div>
@@ -839,6 +1188,15 @@ function bindPasteSetup(mode) {
       sentPreview.textContent = `${sents.length}개 문장으로 나뉠 예정`;
     }
     startBtn.disabled = sents.length === 0;
+  });
+
+  // 줄바꿈이 많은 긴 지문을 붙여넣는 칸이라 단순 Enter는 줄바꿈으로 두고,
+  // Ctrl/Cmd+Enter로 학습 시작을 누를 수 있게 한다 (의도치 않은 시작 방지).
+  textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      if (!startBtn.disabled) startBtn.click();
+    }
   });
 
   startBtn.addEventListener('click', async () => {
@@ -912,9 +1270,12 @@ function renderWriteStudy() {
 
       <div class="answer-row">
         <textarea id="write-answer" placeholder="위 해석에 맞는 영어 문장을 작성해보세요" ${result ? 'readonly' : ''}>${result ? escapeHtml(sess.lastUserAnswer || '') : ''}</textarea>
-        <button class="send-btn" id="write-submit" ${result ? 'disabled' : ''} aria-label="제출"><i class="ti ti-send-2"></i></button>
+        <button class="send-btn" id="write-submit" ${result ? 'disabled' : ''} aria-label="제출"><span>Enter</span><i class="ti ti-corner-down-left"></i></button>
       </div>
-      <div class="hint-row">${result ? '' : '문장을 쓰고 <kbd>Enter</kbd> 를 누르면 채점돼요 (줄바꿈은 <kbd>Shift+Enter</kbd>)'}</div>
+      <div class="hint-row-flex">
+        <span class="hint-row">${result ? '' : '문장을 쓰고 <kbd>Enter</kbd> 를 누르면 채점돼요 (줄바꿈은 <kbd>Shift+Enter</kbd>)'}</span>
+        ${result ? '' : '<button class="skip-btn" id="write-skip" type="button"><i class="ti ti-player-skip-forward"></i> 이 문장 건너뛰기</button>'}
+      </div>
 
       <div id="write-grade-area"></div>
     </div>
@@ -939,6 +1300,9 @@ function renderWriteStudy() {
       submitBtn.disabled = answerBox.value.trim().length === 0;
     });
     submitBtn.disabled = true;
+
+    const skipBtn = document.getElementById('write-skip');
+    if (skipBtn) skipBtn.addEventListener('click', () => skipSentence('write'));
   } else {
     renderGradeResult('write', idx, result);
   }
@@ -1021,9 +1385,12 @@ function renderInterpretStudy() {
 
       <div class="answer-row">
         <textarea id="interpret-answer" placeholder="위 문장을 한국어로 해석해보세요" ${result ? 'readonly' : ''}>${result ? escapeHtml(sess.lastUserAnswer || '') : ''}</textarea>
-        <button class="send-btn" id="interpret-submit" ${result ? 'disabled' : ''} aria-label="제출"><i class="ti ti-send-2"></i></button>
+        <button class="send-btn" id="interpret-submit" ${result ? 'disabled' : ''} aria-label="제출"><span>Enter</span><i class="ti ti-corner-down-left"></i></button>
       </div>
-      <div class="hint-row">${result ? '' : '해석을 쓰고 <kbd>Enter</kbd> 를 누르면 채점돼요 (줄바꿈은 <kbd>Shift+Enter</kbd>)'}</div>
+      <div class="hint-row-flex">
+        <span class="hint-row">${result ? '' : '해석을 쓰고 <kbd>Enter</kbd> 를 누르면 채점돼요 (줄바꿈은 <kbd>Shift+Enter</kbd>)'}</span>
+        ${result ? '' : '<button class="skip-btn" id="interpret-skip" type="button"><i class="ti ti-player-skip-forward"></i> 이 문장 건너뛰기</button>'}
+      </div>
 
       <div id="interpret-grade-area"></div>
     </div>
@@ -1048,6 +1415,9 @@ function renderInterpretStudy() {
       submitBtn.disabled = answerBox.value.trim().length === 0;
     });
     submitBtn.disabled = true;
+
+    const skipBtn = document.getElementById('interpret-skip');
+    if (skipBtn) skipBtn.addEventListener('click', () => skipSentence('interpret'));
   } else {
     renderGradeResult('interpret', idx, result);
   }
@@ -1148,8 +1518,20 @@ async function goNextSentence(mode) {
   sess.lastUserAnswer = '';
   if (sess.idx >= sess.sentences.length) sess.finished = true;
   await storageSet(mode === 'write' ? STORAGE_KEYS.WRITE_SESSION : STORAGE_KEYS.INTERPRET_SESSION, sess);
+  await addLibraryProgress();
   if (mode === 'write') renderWriteStudy(); else renderInterpretStudy();
 }
+
+// 채점 없이 다음 문장으로 건너뛴다. 서재 누적 카운트는 채점된 문장만 인정하므로 증가시키지 않는다.
+async function skipSentence(mode) {
+  const sess = mode === 'write' ? state.write : state.interpret;
+  sess.idx += 1;
+  sess.lastUserAnswer = '';
+  if (sess.idx >= sess.sentences.length) sess.finished = true;
+  await storageSet(mode === 'write' ? STORAGE_KEYS.WRITE_SESSION : STORAGE_KEYS.INTERPRET_SESSION, sess);
+  if (mode === 'write') renderWriteStudy(); else renderInterpretStudy();
+}
+
 
 async function saveSentenceToBox(mode, idx, result) {
   const sess = mode === 'write' ? state.write : state.interpret;
