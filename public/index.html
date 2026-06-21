@@ -1735,7 +1735,16 @@ function renderWordsTab(filterText) {
 
   const searchInput = document.getElementById('word-search');
   if (searchInput) {
-    searchInput.addEventListener('input', (e) => renderWordsTab(e.target.value));
+    let composing = false;
+    searchInput.addEventListener('compositionstart', () => { composing = true; });
+    searchInput.addEventListener('compositionend', (e) => {
+      composing = false;
+      renderWordsTab(e.target.value);
+    });
+    searchInput.addEventListener('input', (e) => {
+      if (composing) return; // 한글 자모 조합 중에는 리렌더링하지 않음 (IME 포커스 유지)
+      renderWordsTab(e.target.value);
+    });
     if (filterText) {
       searchInput.focus();
       searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
@@ -1824,7 +1833,16 @@ function renderSentencesTab(filterText) {
 
   const searchInput = document.getElementById('sent-search');
   if (searchInput) {
-    searchInput.addEventListener('input', (e) => renderSentencesTab(e.target.value));
+    let composing = false;
+    searchInput.addEventListener('compositionstart', () => { composing = true; });
+    searchInput.addEventListener('compositionend', (e) => {
+      composing = false;
+      renderSentencesTab(e.target.value);
+    });
+    searchInput.addEventListener('input', (e) => {
+      if (composing) return; // 한글 자모 조합 중에는 리렌더링하지 않음 (IME 포커스 유지)
+      renderSentencesTab(e.target.value);
+    });
     if (filterText) {
       searchInput.focus();
       searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
